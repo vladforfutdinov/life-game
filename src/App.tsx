@@ -6,7 +6,7 @@ const COLS:number = 50;
 
 const App = () => (
   <div className="App">
-    <header className="App-header">Conway's Life Game</header>
+    <header className="App-header">Conway's Game of Life</header>
     <PlayDesk rows={ROWS} cols={COLS} />
   </div>
 );
