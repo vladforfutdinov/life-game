@@ -4,7 +4,7 @@
 - pull this repository
 - run ```npm i```
 - run ```npm start```
-- open [localhost:3000](localhost:3000) or look in the ```npm start``` console to get the link
+- open [localhost:3000](http://localhost:3000) or look in the ```npm start``` console to get the link
 
 ## How to play
 - Click on cell to mark it as *alive*.
