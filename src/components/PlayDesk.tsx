@@ -7,9 +7,10 @@ interface Props {
   cols?: number;
 }
 
+type GridArray = boolean[][];
 interface Grid {
   tick: number;
-  array: boolean[][];
+  array: GridArray;
 }
 
 const neighbourMatrix = [
@@ -25,13 +26,13 @@ const neighbourMatrix = [
 
 const TICK_DURATION = 0.4; // seconds
 
-export const getArray = (rows: number, cols: number, defaultValue = false) =>
+export const getArray = (rows: number, cols: number, defaultValue?: boolean) =>
   Array.from(Array(rows)).map(() =>
-    Array.from(Array(cols)).map(() => defaultValue)
+    Array.from(Array(cols)).map(() => defaultValue ?? Math.random() <= 0.4)
   );
 
 export const countNeighbours = (
-  array: boolean[][],
+  array: GridArray,
   row: number,
   cell: number,
   rows: number,
@@ -51,11 +52,7 @@ export const countNeighbours = (
     return array[rowIndex][cellIndex] ? acc + 1 : acc;
   }, 0);
 
-export const getUpdatedArray = (
-  array: boolean[][],
-  rows: number,
-  cols: number
-) =>
+export const getUpdatedArray = (array: GridArray, rows: number, cols: number) =>
   array.map((row, rowIndex) =>
     row.map((cell, cellIndex) => {
       const count = countNeighbours(array, rowIndex, cellIndex, rows, cols);
@@ -73,34 +70,60 @@ export const getUpdatedArray = (
   );
 
 const PlayDesk = ({ rows = 0, cols = 0 }: Props) => {
-  const [grid, setGrid] = useState({ tick: 0, array: getArray(rows, cols) });
   const [board, setBoard] = useState<JSX.Element | null>(null);
-  const [startGame, setStartGame] = useState(false);
+  const [grid, setGrid] = useState<Grid>({} as Grid);
   const [timeoutHandler, setTimeoutHandler] = useState<number | undefined>();
+  const [startGame, setStartGame] = useState(false);
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
-    setStartGame(false);
-    setTimeoutHandler(undefined);
-  }, []);
+    reset();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    tick && calcGrid(tick);
+  }, [tick]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     setBoard(getBoard(grid.array));
   }, [grid]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    startGame ? calcGrid(grid) : window.clearTimeout(timeoutHandler);
+    startGame ? setTick(tick + 1) : window.clearTimeout(timeoutHandler);
   }, [startGame]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const calcGrid = (baseGrid: Grid) => {
-    const { array, tick } = baseGrid;
+  const resetStates = () => {
+    if (timeoutHandler) {
+      window.clearTimeout(timeoutHandler);
+    }
+
+    setTimeoutHandler(undefined);
+    setStartGame(false);
+    setTick(0);
+  };
+
+  const reset = () => {
+    resetStates();
+    setGrid({ tick: 0, array: getArray(rows, cols) });
+  };
+
+  const clear = () => {
+    resetStates();
+    setGrid({ tick: 0, array: getArray(rows, cols, false) });
+  };
+
+  const increaseTick = () => startGame && setTick(tick + 1);
+
+  const calcGrid = (baseTick = 0) => {
+    const array = baseTick ? grid.array : getArray(rows, cols, false);
     const updatedArray = getUpdatedArray(array, rows, cols);
-    const updatedGrid = { tick: tick + 1, array: updatedArray };
+    const updatedGrid = { tick: baseTick, array: updatedArray };
 
     setGrid(updatedGrid);
 
-    setTimeoutHandler(
-      window.setTimeout(() => calcGrid(updatedGrid), TICK_DURATION * 1000)
-    );
+    if (startGame) {
+      setTimeoutHandler(window.setTimeout(increaseTick, TICK_DURATION * 1000));
+    }
   };
 
   const toggleState = (rowIndex: number, cellIndex: number) => {
@@ -109,17 +132,13 @@ const PlayDesk = ({ rows = 0, cols = 0 }: Props) => {
     setBoard(getBoard(grid.array));
   };
 
-  const getBoard = (array: boolean[][]): JSX.Element => (
+  const getBoard = (array: boolean[][] = []): JSX.Element => (
     <div className="board">
       {array.map((row, index) => (
         <Row
           row={row}
           key={index}
-          toggleState={
-            !startGame
-              ? (cellIndex: number) => toggleState(index, cellIndex)
-              : () => null
-          }
+          toggleState={(cellIndex: number) => toggleState(index, cellIndex)}
         />
       ))}
     </div>
@@ -131,6 +150,13 @@ const PlayDesk = ({ rows = 0, cols = 0 }: Props) => {
       <div className="controls">
         <button type="button" onClick={() => setStartGame(!startGame)}>
           {startGame ? 'Stop' : 'Start'}
+        </button>
+        <span>{grid.tick}</span>
+        <button type="reset" onClick={clear}>
+          Clear
+        </button>
+        <button type="reset" onClick={reset}>
+          Reset
         </button>
       </div>
     </div>
