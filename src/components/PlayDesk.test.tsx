@@ -22,11 +22,13 @@ test('test click cell', () => {
   const { container } = render(<PlayDesk rows={rows} cols={cols} />);
 
   const cells = container.querySelectorAll('.cell');
-  userEvent.click(cells[0]);
+  const cell = cells[0];
 
-  expect(
-    container.querySelectorAll('.cell')[0].classList.contains('live')
-  ).toEqual(true);
+  const prevState = cell.classList.contains('live');
+  userEvent.click(cells[0]);
+  const nextState = cell.classList.contains('live');
+
+  expect(nextState).toEqual(!prevState);
 });
 
 test('calc neighbours', () => {
