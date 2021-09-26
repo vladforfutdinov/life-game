@@ -1,14 +1,20 @@
 import Cell from './Cell';
+import styles from './Row.module.css';
 
 interface Props {
   row?: boolean[];
-  toggleState?(index: number): void;
+  rowIndex?: number;
 }
 
-const Row = ({ row = [], toggleState = () => null }: Props) => (
-  <div className="row">
+const Row = ({ row = [], rowIndex = 0 }: Props) => (
+  <div className={styles.row}>
     {row.map((cell, index) => (
-      <Cell cell={cell} key={index} toggleState={() => toggleState(index)} />
+      <Cell
+        cellState={cell}
+        key={`${rowIndex}${index}`}
+        cell={index}
+        row={rowIndex}
+      />
     ))}
   </div>
 );

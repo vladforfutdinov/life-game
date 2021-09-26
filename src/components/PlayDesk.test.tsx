@@ -1,6 +1,9 @@
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import PlayDesk, { countNeighbours, getUpdatedArray } from './PlayDesk';
+import PlayDesk from './PlayDesk';
+
+const rows = 5;
+const cols = 5;
 
 test('renders empty play desk', () => {
   const { container } = render(<PlayDesk />);
@@ -9,16 +12,12 @@ test('renders empty play desk', () => {
 });
 
 test('renders not empty play desk', () => {
-  const rows = 5;
-  const cols = 5;
   const { container } = render(<PlayDesk rows={rows} cols={cols} />);
 
   expect(container.querySelectorAll('.cell').length).toEqual(rows * cols);
 });
 
-test('test click cell', () => {
-  const rows = 5;
-  const cols = 5;
+test('changes cell state on click', () => {
   const { container } = render(<PlayDesk rows={rows} cols={cols} />);
 
   const cells = container.querySelectorAll('.cell');
@@ -31,77 +30,42 @@ test('test click cell', () => {
   expect(nextState).toEqual(!prevState);
 });
 
-test('calc neighbours', () => {
-  const rows = 3;
-  const cols = 3;
+test('clear cells by button click', () => {
+  const { container } = render(<PlayDesk rows={rows} cols={cols} />);
 
-  const row = 1;
-  const cell = 1;
+  const clearButton = screen.getByText(/clear/i);
+  userEvent.click(clearButton);
+  const cells = Array.from(container.querySelectorAll('.cell'));
 
-  const baseMatrix = [
-    [true, true, true],
-    [true, true, true],
-    [true, true, true],
-  ];
-
-  const result = countNeighbours(baseMatrix, row, cell, rows, cols);
-
-  expect(result).toEqual(8);
+  expect(cells.every((el) => !el.classList.contains('live'))).toEqual(true);
 });
 
-test('calc empty neighbours', () => {
-  const rows = 3;
-  const cols = 3;
+test('reset cells by button click', () => {
+  const { container } = render(<PlayDesk rows={rows} cols={cols} />);
 
-  const row = 1;
-  const cell = 1;
+  const resetButton = screen.getByText(/reset/i);
 
-  const baseMatrix = [
-    [false, false, false],
-    [false, false, false],
-    [false, false, false],
-  ];
+  const prevCellsClassNames = Array.from(container.querySelectorAll('.cell'))
+    .map((el) => Array.from(el.classList))
+    .flat();
 
-  const result = countNeighbours(baseMatrix, row, cell, rows, cols);
+  userEvent.click(resetButton);
 
-  expect(result).toEqual(0);
+  const nextCellsClassNames = Array.from(container.querySelectorAll('.cell'))
+    .map((el) => Array.from(el.classList))
+    .flat();
+
+  expect(prevCellsClassNames).not.toEqual(nextCellsClassNames);
 });
 
-test('calc empty neighbours for edge case', () => {
-  const rows = 3;
-  const cols = 3;
+test('check game over', () => {
+  render(<PlayDesk rows={rows} cols={cols} />);
 
-  const row = 2;
-  const cell = 2;
+  const clearButton = screen.getByText(/clear/i);
+  userEvent.click(clearButton);
 
-  const baseMatrix = [
-    [true, true, true],
-    [true, true, true],
-    [true, true, true],
-  ];
+  const startButton = screen.getByText(/start/i);
+  userEvent.click(startButton);
 
-  const result = countNeighbours(baseMatrix, row, cell, rows, cols);
-
-  expect(result).toEqual(3);
-});
-
-test('check update grid', () => {
-  const rows = 3;
-  const cols = 3;
-
-  const baseMatrix = [
-    [false, true, false],
-    [false, true, false],
-    [false, true, false],
-  ];
-
-  const resultMatrix = [
-    [false, false, false],
-    [true, true, true],
-    [false, false, false],
-  ];
-
-  const result = getUpdatedArray(baseMatrix, rows, cols);
-
-  expect(result).toEqual(resultMatrix);
+  expect(screen.getByText(/is over/i)).toBeInTheDocument();
 });

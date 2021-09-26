@@ -1,0 +1,23 @@
+.cell {
+  --grid-borders: rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 5%,
+    rgba(0, 0, 0, 0) 100%;
+
+  width: 15px;
+  height: 15px;
+  background: linear-gradient(0deg, var(--grid-borders)),
+    linear-gradient(90deg, var(--grid-borders)),
+    linear-gradient(180deg, var(--grid-borders)),
+    linear-gradient(270deg, var(--grid-borders));
+}
+
+.cell:hover {
+  background-color: #bbb;
+}
+
+.live {
+  background-color: #000;
+}
+
+.live:hover {
+  background-color: #666;
+}

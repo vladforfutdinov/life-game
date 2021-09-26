@@ -1,0 +1,9 @@
++ 1. Pretty everything is in one file src/components/PlayDesk.tsx, this is not OK, it should be refactored, please move:
++ 1.1 logic to utils and
++ 1.2 use custom hooks
+
++? 2. ESLint rules disabling, better to avoid it
+
++ 3. Only CSS classes used, no CSS-modules or styled-components or similar technology. It’s impossible to use the current approach in a big project.
+
++? 4. React Testing Library selector should be more specific https://www.robinwieruch.de/react-testing-library

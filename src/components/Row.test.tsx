@@ -2,7 +2,7 @@ import { render } from '@testing-library/react';
 import Row from './Row';
 
 test('renders row', () => {
-  const { container } = render(<Row row={[]} />);
+  const { container } = render(<Row />);
   const el = container?.firstChild as HTMLElement;
   const { classList } = el;
 

@@ -1,10 +1,18 @@
+import cl from 'classnames';
+import styles from './Cell.module.css';
+
 interface Props {
-  cell?: boolean;
-  toggleState?(): void;
+  cellState?: boolean;
+  cell: number;
+  row: number;
 }
 
-const Cell = ({ cell = false, toggleState = () => null }: Props) => (
-  <div className={`cell ${cell ? 'live' : ''}`} onClick={toggleState} />
+const Cell = ({ cellState = false, cell, row }: Props) => (
+  <div
+    data-cell={cell}
+    data-row={row}
+    className={cl(styles.cell, cellState ? styles.live : {})}
+  />
 );
 
 export default Cell;
